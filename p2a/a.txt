@@ -1,0 +1,7 @@
+total 38
+-rw-rw-r-- 1 gouthamr gouthamr     0 Feb 13 14:46 a.txt
+-rw-rw-r-- 1 gouthamr gouthamr    71 Feb 10 11:08 Makefile
+-rwxrwxr-x 1 gouthamr gouthamr   117 Feb 13 01:41 runtests
+-rw-rw-r-- 1 gouthamr gouthamr  6007 Feb 13 14:08 runtests.log
+-rwxrwxr-x 1 gouthamr gouthamr 18632 Feb 13 11:30 wish
+-rw-rw-r-- 1 gouthamr gouthamr 11078 Feb 13 11:30 wish.c

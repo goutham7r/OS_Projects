@@ -1,0 +1,4 @@
+  PID TTY          TIME CMD
+19616 pts/20   00:00:00 bash
+21570 pts/20   00:00:00 wish
+21590 pts/20   00:00:00 ps

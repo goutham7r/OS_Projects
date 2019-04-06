@@ -1,0 +1,13 @@
+CS-537 Project 1b
+Goutham Ramakrishnan
+
+Modifications made for system call implementation: (Same for both getopenedcount and getclosedcount)
+
+1. Defined new constant for the system call in syscall.h
+2. Added function pointer in syscall.c
+3. Added system call function definition in sysfunc.h
+4. Added SYSCALL routine in usys.S
+5. Added integer global variable in sysfile.c. Added line of code in the appropriate system call function (open or close) to increment the global variable each time it is call. Created system call function to return the value of this variable when called. 
+6. Added function definition in user.h.
+7. Created new c file in the user folder which calls the function and prints out the output. 
+8. Modified the user makefile to include the above file for compilation. 
