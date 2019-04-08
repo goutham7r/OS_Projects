@@ -26,7 +26,7 @@ char* sbrk(int);
 int sleep(int);
 int uptime(void);
 int join(void**);
-int clone(void(*) (void *, void *), void*, void*, void*);
+int clone(void(*)(void*, void*), void*, void*, void*);
 
 // user library functions (ulib.c)
 int stat(char*, struct stat*);
@@ -41,6 +41,12 @@ void* memset(void*, int, uint);
 void* malloc(uint);
 void free(void*);
 int atoi(const char*);
+
+void lock_init(lock_t *lock);
+void lock_acquire(lock_t *lock);
+void lock_release(lock_t *lock);
+int thread_create(void(*)(void*, void*), void*, void*);
+int thread_join();
 
 #endif // _USER_H_
 

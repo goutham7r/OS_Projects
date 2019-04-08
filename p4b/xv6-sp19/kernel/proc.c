@@ -19,10 +19,13 @@ extern void trapret(void);
 
 static void wakeup1(void *chan);
 
+struct spinlock sbrk_lock;
+
 void
 pinit(void)
 {
   initlock(&ptable.lock, "ptable");
+  initlock(&sbrk_lock, "sbrk_lock");
 }
 
 // Look in the process table for an UNUSED proc.
@@ -194,10 +197,9 @@ exit(void)
   {
     if(p->parent == proc)
     {
-      
       if(p->pgdir == proc->pgdir) //if it is a child thread
       {
-        p->num_threads = 0;
+        p->num_threads--;
       }
       p->parent = initproc;
       if(p->state == ZOMBIE)
@@ -489,6 +491,7 @@ clone(void(*fcn) (void *, void *), void *arg1, void *arg2, void *stack)
   np->tf->eip = (uint)fcn;
   np->pgdir = proc->pgdir; //sharing address space
   np->stack = stack;
+  np->tf->ebp = (uint)((uint)stack + (uint)PGSIZE); //is this correct/necessary?
   np->tf->esp = (uint)((uint)stack + (uint)PGSIZE - (uint)3*sizeof(uint));
 
   ustack[0] = 0xffffffff;  // fake return PC
@@ -560,4 +563,29 @@ join(void **stack)
     // Wait for children to exit.  (See wakeup1 call in proc_exit.)
     sleep(proc, &ptable.lock);  //DOC: wait-sleep
   }
+}
+
+
+int sbrk(int n)
+{
+  int addr;
+  acquire(&sbrk_lock);
+  addr = proc->sz;
+  if(growproc(n) < 0)
+  {
+    release(&sbrk_lock);
+    return -1;
+  }
+  acquire(&ptable.lock);
+  struct proc *p;
+  for(p = ptable.proc; p < &ptable.proc[NPROC]; p++)
+  {
+    if(p->pgdir != proc->pgdir) //only threads have same page table
+      continue;
+    p->sz = proc->sz;
+  }
+  release(&ptable.lock);
+  release(&sbrk_lock);
+  // cprintf("In sbrk, addr:%d, proc->sz:%d\n", addr, proc->sz);
+  return addr;
 }

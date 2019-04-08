@@ -4,6 +4,16 @@
 #include "user.h"
 #include "x86.h"
 
+
+struct thread_stacks
+{
+  void* stack_alloc;
+  void* stack;
+  int filled;
+};
+
+struct thread_stacks ts[64];
+
 char*
 strcpy(char *s, char *t)
 {
@@ -102,4 +112,78 @@ memmove(void *vdst, void *vsrc, int n)
   while(n-- > 0)
     *dst++ = *src++;
   return vdst;
+}
+
+// from wikipedia
+int fetch_and_add(int* variable, int value)
+{
+    __asm__ volatile("lock; xaddl %0, %1"
+      : "+r" (value), "+m" (*variable) // input+output
+      : // No input-only
+      : "memory"
+    );
+    return value;
+}
+
+void lock_init(lock_t *lock)
+{
+  lock->ticket = 0;
+  lock->turn = 0;
+}
+
+void lock_acquire(lock_t *lock)
+{
+  int turn = fetch_and_add(&lock->ticket, 1);
+  while(lock->turn != turn);
+}
+
+void lock_release(lock_t *lock)
+{
+  lock->turn = lock->turn + 1;
+}
+
+
+int thread_create(void (*start_routine)(void*, void*), void* arg1, void* arg2)
+{
+  uint PGSIZE = 4096;
+  
+  void* stack_alloc = malloc(2*PGSIZE); //to find stack aligned page in malloced memory, we need atleast this much
+  void* stack;
+
+  if(stack_alloc == 0)
+    return -1;
+
+  if((uint)stack_alloc % PGSIZE == 0)
+    stack = stack_alloc;
+  else
+    stack = stack_alloc + (PGSIZE - ((uint)stack_alloc % PGSIZE));
+
+  for(int i=0; i<1000; i++)
+  {
+    if(ts[i].filled == 0)
+    {
+      ts[i].stack_alloc = stack_alloc;
+      ts[i].stack = stack;
+      ts[i].filled = 1;
+      break;
+    }
+  }
+
+  return clone(start_routine, arg1, arg2, stack);
+}
+
+int thread_join()
+{
+  void* stack;
+  int ret = join(&stack);
+  for(int i=0; i<1000; i++)
+  {
+    if(ts[i].filled == 1 && ts[i].stack == stack)
+    {
+      free(ts[i].stack_alloc);
+      ts[i].filled = 0;
+      break;
+    }
+  }
+  return ret;
 }

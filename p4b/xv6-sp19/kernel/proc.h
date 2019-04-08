@@ -28,6 +28,9 @@ struct cpu {
 extern struct cpu cpus[NCPU];
 extern int ncpu;
 
+extern struct spinlock sbrk_lock;
+
+
 // Per-CPU variables, holding pointers to the
 // current cpu and to the current process.
 // The asm suffix tells gcc to use "%gs:0" to refer to cpu

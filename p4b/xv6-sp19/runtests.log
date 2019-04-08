@@ -8,25 +8,7 @@ build xv6 using make
 **********************************************************************
 Trying to build project using make
 make
-gcc  -I include -nostdinc -Wall -Werror -ggdb -fno-pic -fno-builtin -fno-strict-aliasing -fno-stack-protector -m32 \
-	-M -MG kernel/proc.c -MF kernel/proc.d -MT kernel/proc.d -MT kernel/proc.o
-gcc  -I include -nostdinc -Wall -Werror -ggdb -fno-pic -fno-builtin -fno-strict-aliasing -fno-stack-protector -m32 -c -o kernel/proc.o kernel/proc.c
-ld  -m    elf_i386 -nostdlib --omagic \
-	--section-start=.text=0x100000 --entry=main --output=kernel/kernel \
-	kernel/multiboot.o kernel/data.o kernel/bio.o kernel/console.o kernel/exec.o kernel/file.o kernel/fs.o kernel/ide.o kernel/ioapic.o kernel/kalloc.o kernel/kbd.o kernel/lapic.o kernel/main.o kernel/mp.o kernel/picirq.o kernel/pipe.o kernel/proc.o kernel/spinlock.o kernel/string.o kernel/swtch.o kernel/syscall.o kernel/sysfile.o kernel/sysproc.o kernel/timer.o kernel/trapasm.o kernel/trap.o kernel/uart.o kernel/vectors.o kernel/vm.o \
-	-b binary initcode bootother
-dd if=/dev/zero of=xv6.img count=10000
-10000+0 records in
-10000+0 records out
-5120000 bytes (5.1 MB, 4.9 MiB) copied, 0.018363 s, 279 MB/s
-dd if=kernel/bootblock of=xv6.img conv=notrunc
-1+0 records in
-1+0 records out
-512 bytes copied, 5.2175e-05 s, 9.8 MB/s
-dd if=kernel/kernel of=xv6.img seek=1 conv=notrunc
-257+1 records in
-257+1 records out
-131940 bytes (132 kB, 129 KiB) copied, 0.000376287 s, 351 MB/s
+make: Nothing to be done for 'all'.
 
 
 test build PASSED
@@ -56,6 +38,7 @@ usertests
 init
 echo
 stressfs
+threads_sbrk
 README
 sh
 rm
@@ -69,7 +52,7 @@ zombie
 ln
 tester
 wc
-balloc: first 463 blocks have been allocated
+balloc: first 569 blocks have been allocated
 balloc: write bitmap block at sector 28
 rm user/bin/tester
 make qemu-nox 
@@ -118,6 +101,7 @@ usertests
 init
 echo
 stressfs
+threads_sbrk
 README
 sh
 rm
@@ -131,7 +115,7 @@ zombie
 ln
 tester
 wc
-balloc: first 465 blocks have been allocated
+balloc: first 572 blocks have been allocated
 balloc: write bitmap block at sector 28
 rm user/bin/tester
 make qemu-nox 
@@ -151,7 +135,6 @@ init: starting sh
 $ tester
 tester
 PASSED TEST!
-
 
 test clone_arguments PASSED (10 of 10)
  (test for arguments to clone() and join())
@@ -180,6 +163,7 @@ usertests
 init
 echo
 stressfs
+threads_sbrk
 README
 sh
 rm
@@ -193,7 +177,7 @@ zombie
 ln
 tester
 wc
-balloc: first 466 blocks have been allocated
+balloc: first 573 blocks have been allocated
 balloc: write bitmap block at sector 28
 rm user/bin/tester
 make qemu-nox 
@@ -242,6 +226,7 @@ usertests
 init
 echo
 stressfs
+threads_sbrk
 README
 sh
 rm
@@ -255,7 +240,7 @@ zombie
 ln
 tester
 wc
-balloc: first 464 blocks have been allocated
+balloc: first 570 blocks have been allocated
 balloc: write bitmap block at sector 28
 rm user/bin/tester
 make qemu-nox 
@@ -303,6 +288,7 @@ usertests
 init
 echo
 stressfs
+threads_sbrk
 README
 sh
 rm
@@ -316,7 +302,7 @@ zombie
 ln
 tester
 wc
-balloc: first 461 blocks have been allocated
+balloc: first 568 blocks have been allocated
 balloc: write bitmap block at sector 28
 rm user/bin/tester
 make qemu-nox 
@@ -337,6 +323,7 @@ $ tester
 tester
 PASSED TEST!
 
+
 test fork_join PASSED (10 of 10)
  (after fork(), join() should not succeed)
 
@@ -354,21 +341,54 @@ make
 gcc  -I include -nostdinc -Wall -Werror -ggdb -fno-pic -fno-builtin -fno-strict-aliasing -fno-stack-protector -m32 \
 	-M -MG user/tester.c -MF user/tester.d -MT user/tester.d -MT user/tester.o
 gcc  -I include -nostdinc -Wall -Werror -ggdb -fno-pic -fno-builtin -fno-strict-aliasing -fno-stack-protector -m32 -c -o user/tester.o user/tester.c
-user/tester.c: In function ‘main’:
-user/tester.c:66:10: error: implicit declaration of function ‘thread_create’ [-Werror=implicit-function-declaration]
-   pid1 = thread_create(&func, &arg1, &arg2);
-          ^~~~~~~~~~~~~
-user/tester.c:69:10: error: implicit declaration of function ‘thread_join’ [-Werror=implicit-function-declaration]
-   pid2 = thread_join();
-          ^~~~~~~~~~~
-cc1: all warnings being treated as errors
-user/makefile.mk:94: recipe for target 'user/tester.o' failed
-make: *** [user/tester.o] Error 1
+ld  -m    elf_i386 -nostdlib --omagic --entry=main --section-start=.text=0x0 --output=user/bin/tester user/tester.o user/ulib.o user/usys.o user/printf.o user/umalloc.o
+cp user/bin/tester fs/tester
+./tools/mkfs fs.img fs
+used 29 (bit 1 ninode 26) free 29 total 1024
+ls
+clone_wait
+usertests
+init
+echo
+stressfs
+threads_sbrk
+README
+sh
+rm
+clone_arguments
+forktest
+kill
+cat
+grep
+mkdir
+zombie
+ln
+tester
+wc
+balloc: first 572 blocks have been allocated
+balloc: write bitmap block at sector 28
+rm user/bin/tester
+make qemu-nox 
+Ctrl+a h for help
+/p/course/cs537-remzi/ta/tools/qemu -nographic -hdb fs.img xv6.img -smp 2
+WARNING: Image format was not specified for 'fs.img' and probing guessed raw.
+         Automatically detecting the format is dangerous for raw images, write operations on block 0 will be restricted.
+         Specify the 'raw' format explicitly to remove the restrictions.
+WARNING: Image format was not specified for 'xv6.img' and probing guessed raw.
+         Automatically detecting the format is dangerous for raw images, write operations on block 0 will be restricted.
+         Specify the 'raw' format explicitly to remove the restrictions.
+xv6...
+lapicinit: 1 0xfee00000
+cpu1: starting
+cpu0: starting
+init: starting sh
+$ tester
+tester
+PASSED TEST!
 
 
-test threads_basic FAILED (0 of 10)
+test threads_basic PASSED (10 of 10)
  (basic tests for thread_create() and thread_join())
- make failed (error 2)
 
 starting threads_many
 
@@ -384,21 +404,64 @@ make
 gcc  -I include -nostdinc -Wall -Werror -ggdb -fno-pic -fno-builtin -fno-strict-aliasing -fno-stack-protector -m32 \
 	-M -MG user/tester.c -MF user/tester.d -MT user/tester.d -MT user/tester.o
 gcc  -I include -nostdinc -Wall -Werror -ggdb -fno-pic -fno-builtin -fno-strict-aliasing -fno-stack-protector -m32 -c -o user/tester.o user/tester.c
-user/tester.c: In function ‘fill_ptable’:
-user/tester.c:69:11: error: implicit declaration of function ‘thread_create’ [-Werror=implicit-function-declaration]
-     pid = thread_create(&func1, NULL, NULL);
-           ^~~~~~~~~~~~~
-user/tester.c:85:11: error: implicit declaration of function ‘thread_join’ [-Werror=implicit-function-declaration]
-     pid = thread_join();
-           ^~~~~~~~~~~
-cc1: all warnings being treated as errors
-user/makefile.mk:94: recipe for target 'user/tester.o' failed
-make: *** [user/tester.o] Error 1
+ld  -m    elf_i386 -nostdlib --omagic --entry=main --section-start=.text=0x0 --output=user/bin/tester user/tester.o user/ulib.o user/usys.o user/printf.o user/umalloc.o
+cp user/bin/tester fs/tester
+./tools/mkfs fs.img fs
+used 29 (bit 1 ninode 26) free 29 total 1024
+ls
+clone_wait
+usertests
+init
+echo
+stressfs
+threads_sbrk
+README
+sh
+rm
+clone_arguments
+forktest
+kill
+cat
+grep
+mkdir
+zombie
+ln
+tester
+wc
+balloc: first 576 blocks have been allocated
+balloc: write bitmap block at sector 28
+rm user/bin/tester
+make qemu-nox 
+Ctrl+a h for help
+/p/course/cs537-remzi/ta/tools/qemu -nographic -hdb fs.img xv6.img -smp 2
+WARNING: Image format was not specified for 'fs.img' and probing guessed raw.
+         Automatically detecting the format is dangerous for raw images, write operations on block 0 will be restricted.
+         Specify the 'raw' format explicitly to remove the restrictions.
+WARNING: Image format was not specified for 'xv6.img' and probing guessed raw.
+         Automatically detecting the format is dangerous for raw images, write operations on block 0 will be restricted.
+         Specify the 'raw' format explicitly to remove the restrictions.
+xv6...
+lapicinit: 1 0xfee00000
+cpu1: starting
+cpu0: starting
+init: starting sh
+$ tester
+tester
+Creating child threads...
+Created 57 child threads
+Joining all 57 child threads...
+All 57 child threads joined
+Creating child threads...
+Created 61 child threads
+Joining all 61 child threads...
+All 61 child threads joined
+Creating and joining 10000 child threads...
+Forking and joining 100 child processes...
+PASSED TEST!
 
 
-test threads_many FAILED (0 of 10)
+test threads_many PASSED (10 of 10)
  (create and join many threads)
- make failed (error 2)
 
 starting threads_sbrk
 
@@ -424,6 +487,7 @@ usertests
 init
 echo
 stressfs
+threads_sbrk
 README
 sh
 rm
@@ -437,7 +501,7 @@ zombie
 ln
 tester
 wc
-balloc: first 472 blocks have been allocated
+balloc: first 578 blocks have been allocated
 balloc: write bitmap block at sector 28
 rm user/bin/tester
 make qemu-nox 
@@ -457,13 +521,12 @@ init: starting sh
 $ tester
 tester
 Creating 1 thread to call sbrk() once...
-user/tester.c:93 check (addr == (char *)stack1 + 2*PGSIZE) failed: sbrk() failed
-TEST FAILED
+Creating 2 threads to call sbrk() many times...
+PASSED TEST!
 
 
-test threads_sbrk FAILED (0 of 10)
+test threads_sbrk PASSED (10 of 10)
  (test to make sure threads handle sbrk() correctly)
- tester failed
 
 starting lock_basic
 
@@ -479,29 +542,55 @@ make
 gcc  -I include -nostdinc -Wall -Werror -ggdb -fno-pic -fno-builtin -fno-strict-aliasing -fno-stack-protector -m32 \
 	-M -MG user/tester.c -MF user/tester.d -MT user/tester.d -MT user/tester.o
 gcc  -I include -nostdinc -Wall -Werror -ggdb -fno-pic -fno-builtin -fno-strict-aliasing -fno-stack-protector -m32 -c -o user/tester.o user/tester.c
-user/tester.c:20:1: error: unknown type name ‘lock_t’
- lock_t lock;
- ^~~~~~
-user/tester.c: In function ‘func’:
-user/tester.c:48:5: error: implicit declaration of function ‘lock_acquire’ [-Werror=implicit-function-declaration]
-     lock_acquire(&lock);
-     ^~~~~~~~~~~~
-user/tester.c:54:5: error: implicit declaration of function ‘lock_release’; did you mean ‘__sync_lock_release’? [-Werror=implicit-function-declaration]
-     lock_release(&lock);
-     ^~~~~~~~~~~~
-     __sync_lock_release
-user/tester.c: In function ‘main’:
-user/tester.c:69:3: error: implicit declaration of function ‘lock_init’ [-Werror=implicit-function-declaration]
-   lock_init(&lock);
-   ^~~~~~~~~
-cc1: all warnings being treated as errors
-user/makefile.mk:94: recipe for target 'user/tester.o' failed
-make: *** [user/tester.o] Error 1
+ld  -m    elf_i386 -nostdlib --omagic --entry=main --section-start=.text=0x0 --output=user/bin/tester user/tester.o user/ulib.o user/usys.o user/printf.o user/umalloc.o
+cp user/bin/tester fs/tester
+./tools/mkfs fs.img fs
+used 29 (bit 1 ninode 26) free 29 total 1024
+ls
+clone_wait
+usertests
+init
+echo
+stressfs
+threads_sbrk
+README
+sh
+rm
+clone_arguments
+forktest
+kill
+cat
+grep
+mkdir
+zombie
+ln
+tester
+wc
+balloc: first 571 blocks have been allocated
+balloc: write bitmap block at sector 28
+rm user/bin/tester
+make qemu-nox 
+Ctrl+a h for help
+/p/course/cs537-remzi/ta/tools/qemu -nographic -hdb fs.img xv6.img -smp 2
+WARNING: Image format was not specified for 'fs.img' and probing guessed raw.
+         Automatically detecting the format is dangerous for raw images, write operations on block 0 will be restricted.
+         Specify the 'raw' format explicitly to remove the restrictions.
+WARNING: Image format was not specified for 'xv6.img' and probing guessed raw.
+         Automatically detecting the format is dangerous for raw images, write operations on block 0 will be restricted.
+         Specify the 'raw' format explicitly to remove the restrictions.
+xv6...
+lapicinit: 1 0xfee00000
+cpu1: starting
+cpu0: starting
+init: starting sh
+$ tester
+tester
+Unblocking all 50 threads...
+PASSED TEST!
 
 
-test lock_basic FAILED (0 of 10)
+test lock_basic PASSED (10 of 10)
  (basic test for lock correctness)
- make failed (error 2)
 
 **********************************************************************
 Summary:
@@ -523,22 +612,18 @@ test clone_wait PASSED (10 of 10)
 test fork_join PASSED (10 of 10)
  (after fork(), join() should not succeed)
 
-test threads_basic FAILED (0 of 10)
+test threads_basic PASSED (10 of 10)
  (basic tests for thread_create() and thread_join())
- make failed (error 2)
 
-test threads_many FAILED (0 of 10)
+test threads_many PASSED (10 of 10)
  (create and join many threads)
- make failed (error 2)
 
-test threads_sbrk FAILED (0 of 10)
+test threads_sbrk PASSED (10 of 10)
  (test to make sure threads handle sbrk() correctly)
- tester failed
 
-test lock_basic FAILED (0 of 10)
+test lock_basic PASSED (10 of 10)
  (basic test for lock correctness)
- make failed (error 2)
 
-Passed 6 of 10 tests.
-Overall 6 of 10
-Points 50 of 90
+Passed 10 of 10 tests.
+Overall 10 of 10
+Points 90 of 90

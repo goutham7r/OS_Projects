@@ -5,6 +5,8 @@
 #include "mmu.h"
 #include "proc.h"
 #include "sysfunc.h"
+#include "spinlock.h"
+
 
 int
 sys_fork(void)
@@ -44,18 +46,11 @@ sys_getpid(void)
 int
 sys_sbrk(void)
 {
-  int addr;
   int n;
-
   if(argint(0, &n) < 0)
     return -1;
 
-  addr = proc->sz;
-  if(growproc(n) < 0)
-  {
-    return -1;
-  }
-  return addr;
+  return sbrk(n);
 }
 
 int

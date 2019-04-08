@@ -112,6 +112,7 @@ void            wakeup(void*);
 void            yield(void);
 int 			clone(void(*) (void *, void *), void *, void *, void *);
 int 			join(void**);
+int 			sbrk(int);
 
 // swtch.S
 void            swtch(struct context**, struct context*);
